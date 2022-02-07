@@ -1,32 +1,23 @@
 # Fetch data from GoogleSheet to flutter app 
 
-![fetch data from google sheet to flutter app by theindianappguy](https://user-images.githubusercontent.com/55942632/99902603-fcc70880-2ce4-11eb-87c3-74211c807fcd.png)
+![fetch data from google sheet to flutter app by BoyuanSHI](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTL1cp7bf-JaYhJgLSZBev1G6l3nnqumIHfzg&usqp=CAU)
 
-Tutorial Mentioned In the Video:
-
-To Learn About API:
-○ Build a Wallpaper App with Flutter: https://youtu.be/EKdAU3l_0gA
-○ Build a Recipe App with Flutter: https://youtu.be/VTR5HpRfS0A
+To Learn About This Project:
+○ Build a App with Flutter, For Desktop and Web Mainly
+○ Use Gsheets to fetch data
 
 ○ Learn How to Save Data from Flutter App to Google Sheets: https://youtu.be/x2CoecrzBCA
 
-If you found this helpful or you learned something from this and want to thank me, consider buying me a cup of ☕ (it helps & supports me to make more): https://paypal.me/iamsanskartiwari
+If you found this helpful or you learned something from this and want to thank me, consider buying me a cup of ☕ (it helps & supports me to make more): https://paypal.me/sbysbys
 
-📙 Join 5-Day Flutter Bootcamp for Beginners
+📙 Join 5-Day Flutter Bootcamp for Beginners(It is very useful)
 https://flutternerd.com/free-training/
 
-🎓More tutorials you may like
-○ Build a Flutter News App with NewsApi Org: https://youtu.be/aaGcER1uUoE
-○ Build a Flutter Firebase Blog App: https://www.youtube.com/watch?v=KZBdh...
-○ Building a Travel App UI Design Tutorial: https://youtu.be/PKEam1KpeWk
-
-If you like it make sure to 🔥 Subscribe for more: https://www.youtube.com/channel/UCsPd...
+🎓More tutorials coming soon
 
 Have questions/queries? 💬 Comment below I will be happy to help
 
-Say hi 👋 on Linkedin: linkedin.com/in/lamsanskar/
-Follow me on 🐦 Twitter: twitter.com/Theindianappguy
-
+Say hi 👋 on Linkedin: https://www.linkedin.com/in/boyuan-shi-9861b7157
 
 ## Getting Started
 
