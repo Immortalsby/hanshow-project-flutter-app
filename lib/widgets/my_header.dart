@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../config/constant.dart';
+import '../utils/constant.dart';
 
 class MyHeader extends StatefulWidget {
   final String image;

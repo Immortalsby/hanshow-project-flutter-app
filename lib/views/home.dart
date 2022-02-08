@@ -5,11 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import '../custom_animations/delayed_animation.dart';
 import 'package:intl/intl.dart';
-import '../config/shared_preferences_util.dart';
-import '../config/constant.dart';
+import '../utils/shared_preferences_util.dart';
+import '../utils/constant.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
 import '../widgets/my_toast.dart';
-import 'change_password.dart';
+import 'change_password_view.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);

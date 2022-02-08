@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hanshow_project_google_sheets/models/crypt.dart';
 import 'package:hanshow_project_google_sheets/widgets/my_toast.dart';
 import '../models/change_password.dart';
-import '../config/shared_preferences_util.dart';
+import '../utils/shared_preferences_util.dart';
 import '../models/crypt.dart';
 
 class ChangePasswordView extends StatefulWidget {
@@ -81,19 +81,24 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 validator: (value) => passValidator(value),
                 controller: _confirmPasswordController,
                 obscureText: passwordInvisible[2],
-                decoration: showPasswordDeco("Confirm your new password", 2)
-                // onEditingComplete: () {
-                //   Future.delayed(const Duration(seconds: 0),
-                //       () async {
-                //     bool res = await TeamManager()
-                //         .insert(row, column, _editController.text);
-                //     Navigator.pop(context);
-                //     MyToast.show(res ? 'Success!' : 'Failed');
-                //     setState(() {
-                //       getData();
-                //     });
-                //   });
-                // },
+                decoration: showPasswordDeco("Confirm your new password", 2),
+                onEditingComplete: () {
+              // Change password
+              if (_formKey.currentState!.validate()) {
+                Future.delayed(Duration.zero, () async {
+                  bool success = await ChangePassword().change(
+                      SharedPreferenceUtil.getString('email'),
+                      oldpass,
+                      Security(text: _newPasswordController.text).encrypt());
+                  if (success) {
+                    Navigator.pop(context);
+                    MyToast.show('Password Updated!');
+                  } else {
+                    MyToast.show('Password Update Failed!');
+                  }
+                });
+              }
+                },
                 ),
           ],
         ),

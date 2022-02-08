@@ -1,6 +1,6 @@
 import '../config/config.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
-import '../config/shared_preferences_util.dart';
+import '../utils/shared_preferences_util.dart';
 
 class ChangePassword {
 

@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:adaptive_scrollbar/adaptive_scrollbar.dart';
 import 'package:flutter/material.dart';
-import 'package:hanshow_project_google_sheets/models/team.dart';
+import 'package:hanshow_project_google_sheets/models/team_model.dart';
 import 'package:hanshow_project_google_sheets/views/left_sidebar.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
 import '../widgets/my_toast.dart';
-import '../config/shared_preferences_util.dart';
+import '../utils/shared_preferences_util.dart';
 import 'package:flutter/services.dart';
-import '../config/constant.dart';
-import '../models/team.dart';
+import '../utils/constant.dart';
+import '../models/team_model.dart';
 import '../models/add_history.dart';
 
 class Team extends StatefulWidget {

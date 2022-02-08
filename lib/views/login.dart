@@ -2,11 +2,11 @@ import '../config/config.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/my_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; //TODO Fix with new version!
-import '../config/constant.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../utils/constant.dart';
 import 'package:intl/intl.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
-import '../config/shared_preferences_util.dart';
+import '../utils/shared_preferences_util.dart';
 import '../models/crypt.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
 
@@ -62,10 +62,14 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.text = SharedPreferenceUtil.getString('email')!.isEmpty
         ? ""
         : SharedPreferenceUtil.getString('email')!;
-
-    ScreenUtil.instance = ScreenUtil.getInstance()..init(context);
-    ScreenUtil.instance =
-        ScreenUtil(width: 750, height: 1334, allowFontScaling: true);
+    ScreenUtil.init(
+        BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width,
+            maxHeight: MediaQuery.of(context).size.height),
+        designSize: const Size(750, 1334),
+        context: context,
+        minTextAdapt: true,
+        orientation: Orientation.portrait);
     return Scaffold(
       body: SingleChildScrollView(
         controller: controller,
@@ -114,17 +118,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             Text("Login",
                                 style: TextStyle(
                                     fontSize:
-                                        ScreenUtil.getInstance().setSp(45),
+                                        ScreenUtil().setSp(45),
                                     fontFamily: "Poppins-Bold",
                                     letterSpacing: .6)),
                             SizedBox(
-                              height: ScreenUtil.getInstance().setHeight(30),
+                              height: ScreenUtil().setHeight(30),
                             ),
                             Text("Email",
                                 style: TextStyle(
                                     fontFamily: "Poppins",
                                     fontSize:
-                                        ScreenUtil.getInstance().setSp(26))),
+                                        ScreenUtil().setSp(26))),
                             TextFormField(
                               controller: _emailController,
                               autofocus: true,
@@ -149,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       color: Colors.grey, fontSize: 12.0)),
                             ),
                             SizedBox(
-                              height: ScreenUtil.getInstance().setHeight(30),
+                              height: ScreenUtil().setHeight(30),
                             ),
 
                             // Password Part
@@ -159,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(
                                     fontFamily: "Poppins",
                                     fontSize:
-                                        ScreenUtil.getInstance().setSp(26))),
+                                        ScreenUtil().setSp(26))),
                             TextFormField(
                               controller: _passwordController,
                               obscureText: passwordInvisible,
@@ -191,22 +195,22 @@ class _LoginScreenState extends State<LoginScreen> {
                               onEditingComplete: () => login(),
                             ),
                             SizedBox(
-                              height: ScreenUtil.getInstance().setHeight(35),
+                              height: ScreenUtil().setHeight(35),
                             ),
                             SizedBox(
-                                height: ScreenUtil.getInstance().setHeight(40)),
+                                height: ScreenUtil().setHeight(40)),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 SizedBox(
                                     width:
-                                        ScreenUtil.getInstance().setHeight(40)),
+                                        ScreenUtil().setHeight(40)),
                                 InkWell(
                                   child: Container(
                                     width:
-                                        ScreenUtil.getInstance().setWidth(330),
+                                        ScreenUtil().setWidth(330),
                                     height:
-                                        ScreenUtil.getInstance().setHeight(100),
+                                        ScreenUtil().setHeight(100),
                                     decoration: BoxDecoration(
                                         color: kPrimaryColor,
                                         borderRadius:
@@ -238,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                             SizedBox(
-                              height: ScreenUtil.getInstance().setHeight(35),
+                              height: ScreenUtil().setHeight(35),
                             ),
                           ],
                         ),
@@ -246,23 +250,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(
-                    height: ScreenUtil.getInstance().setHeight(40),
+                    height: ScreenUtil().setHeight(40),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       horizontalLine(),
-                      const Text("Version: 20220205-v0.12",
+                      const Text("Version: $version",
                           style: TextStyle(
                               fontSize: 16.0, fontFamily: "Poppins-Medium")),
                       horizontalLine()
                     ],
                   ),
                   SizedBox(
-                    height: ScreenUtil.getInstance().setHeight(40),
+                    height: ScreenUtil().setHeight(40),
                   ),
                   SizedBox(
-                    height: ScreenUtil.getInstance().setHeight(30),
+                    height: ScreenUtil().setHeight(30),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -291,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget horizontalLine() => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Container(
-          width: ScreenUtil.getInstance().setWidth(120),
+          width: ScreenUtil().setWidth(120),
           height: 1.0,
           color: Colors.black26.withOpacity(.2),
         ),

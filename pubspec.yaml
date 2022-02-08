@@ -34,7 +34,7 @@ dependencies:
   material_floating_search_bar: ^0.3.6
   google_fonts: ^2.3.1
   avatar_glow: ^2.0.2
-  flutter_screenutil: ^0.4.2
+  flutter_screenutil: ^5.1.1
   flutter_svg: ^1.0.3
   mysql1: ^0.19.2
   encrypt: ^5.0.1
@@ -42,6 +42,10 @@ dependencies:
   oktoast: ^3.1.5
   shared_preferences: ^2.0.13
   no_context_navigation: ^2.1.2
+  grouped_list: ^4.2.0
+  pretty_diff_text: ^1.0.0
+  url_launcher: ^6.0.18
+  syncfusion_flutter_datagrid: ^19.4.48+1
 
 dev_dependencies:
   flutter_lints: ^1.0.4
