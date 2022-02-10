@@ -7,6 +7,7 @@ import 'package:hanshow_project_google_sheets/views/todo_view.dart';
 import 'package:hanshow_project_google_sheets/views/home.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:get/get.dart';
 
 Future<void> main() async {
   runApp(const MyApp());
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       animationCurve: Curves.easeIn,
       animationDuration: const Duration(milliseconds: 200),
       duration: const Duration(seconds: 3),
-      child: MaterialApp(
+      child: GetMaterialApp(
           navigatorKey: NavigationService.navigationKey,
           debugShowCheckedModeBanner: false,
           title: 'Hanshow Project',

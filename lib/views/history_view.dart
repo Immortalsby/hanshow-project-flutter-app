@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/get_history.dart';
 import '../utils/shared_preferences_util.dart';
@@ -19,7 +20,6 @@ class History extends StatefulWidget {
 }
 
 class _HistoryState extends State<History> {
-
   // final team = HistoryManager();
   StreamController<List> streamController = StreamController();
 
@@ -92,8 +92,10 @@ class _HistoryState extends State<History> {
                         order: GroupedListOrder.ASC,
                         floatingHeader: true,
                         useStickyGroupSeparators: true,
-                        groupBy: (data) =>
-                            DateFormat.yMMMd().format(data['modify_date']),
+                        groupBy: (data) => kIsWeb
+                            ? DateFormat.yMMMd()
+                                .format(DateTime.parse(data['modify_date']))
+                            : DateFormat.yMMMd().format(data['modify_date']),
                         groupHeaderBuilder: (data) => SizedBox(
                           height: 40,
                           child: Align(
@@ -107,8 +109,11 @@ class _HistoryState extends State<History> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  DateFormat.yMMMEd()
-                                      .format(data['modify_date']),
+                                  kIsWeb
+                                      ? DateFormat.yMMMEd().format(
+                                          DateTime.parse(data['modify_date']))
+                                      : DateFormat.yMMMEd()
+                                          .format(data['modify_date']),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(color: Colors.white),
                                 ),
@@ -137,7 +142,10 @@ class _HistoryState extends State<History> {
                                               "Modify records for ${data['target_sheet']}(${data['position']}) "),
                                           content: SingleChildScrollView(
                                             child: PrettyDiffText(
-                                              defaultTextStyle: const TextStyle(fontFamily: "Poppins", fontSize: 18, color: Colors.black),
+                                              defaultTextStyle: const TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 18,
+                                                  color: Colors.black),
                                               oldText: data['original_data'],
                                               newText: data['new_data'],
                                             ),
@@ -161,30 +169,38 @@ class _HistoryState extends State<History> {
                                                 .toString()
                                                 .capitalize(),
                                             style: const TextStyle(
-                                                color: Colors.blueAccent, fontSize: 16),
+                                                color: Colors.blueAccent,
+                                                fontSize: 16),
                                             children: [
                                           const TextSpan(
                                             text: ' Has Changed ',
-                                            style:
-                                                TextStyle(color: Colors.black, fontSize: 16),
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 16),
                                           ),
                                           TextSpan(
                                             text: data['position'],
                                             style: const TextStyle(
-                                                color: Colors.redAccent, fontSize: 16),
+                                                color: Colors.redAccent,
+                                                fontSize: 16),
                                           ),
                                           const TextSpan(
                                             text: ' in ',
-                                            style:
-                                                TextStyle(color: Colors.black, fontSize: 16),
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 16),
                                           ),
                                           TextSpan(
                                             text: data['target_sheet'],
                                             style: const TextStyle(
-                                                color: Colors.deepOrangeAccent, fontSize: 16),
+                                                color: Colors.deepOrangeAccent,
+                                                fontSize: 16),
                                           )
                                         ])),
-                                    trailing: Text(DateFormat.Hm()
+                                    trailing: Text(                                  kIsWeb
+                                      ? DateFormat.Hm().format(
+                                          DateTime.parse(data['modify_date']))
+                                      :DateFormat.Hm()
                                         .format(data['modify_date'])),
                                   ),
                                 ),

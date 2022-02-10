@@ -13,8 +13,6 @@ class LeftSideBar extends StatelessWidget {
     var route = ModalRoute.of(context);
     String _path = '/';
     if (route != null) {
-      // ignore: avoid_print
-      print(route.settings.name);
       _path = route.settings.name!;
     }
     return Drawer(
@@ -122,6 +120,20 @@ class LeftSideBar extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 20),
                 child: ListTile(
+                  title: const Text('To-Do List'),
+                  leading: const Icon(
+                    Icons.list,
+                    color: Colors.black,
+                  ),
+                  onTap: () {
+
+                      Navigator.popAndPushNamed(context, '/todo');
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: ListTile(
                   title: const Text('History'),
                   leading: const Icon(
                     Icons.history,
@@ -130,23 +142,6 @@ class LeftSideBar extends StatelessWidget {
                   onTap: () {
                     if (_path != '/history') {
                       Navigator.popAndPushNamed(context, '/history');
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: ListTile(
-                  title: const Text('To-Do List'),
-                  leading: const Icon(
-                    Icons.list,
-                    color: Colors.black,
-                  ),
-                  onTap: () {
-                    if (_path != '/todo') {
-                      Navigator.popAndPushNamed(context, '/todo');
                     } else {
                       Navigator.pop(context);
                     }

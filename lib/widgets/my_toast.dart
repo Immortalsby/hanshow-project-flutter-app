@@ -9,6 +9,6 @@ class MyToast {
         position: ToastPosition.bottom,
         backgroundColor: Colors.black.withOpacity(0.8),
         radius: 3.0,
-        textStyle: const TextStyle(fontSize: 16.0, fontFamily: "Poppins"));
+        textStyle: const TextStyle(fontSize: 16.0, fontFamily: "Poppins", color: Colors.white));
   }
 }

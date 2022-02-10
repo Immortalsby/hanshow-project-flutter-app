@@ -1,17 +1,21 @@
 import 'dart:async';
-import 'package:adaptive_scrollbar/adaptive_scrollbar.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hanshow_project_google_sheets/models/todo_model.dart';
 import 'package:hanshow_project_google_sheets/views/left_sidebar.dart';
-import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import '../utils/constant.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
 import '../widgets/my_toast.dart';
 import '../utils/shared_preferences_util.dart';
-import 'package:flutter/services.dart';
-import '../utils/constant.dart';
 import '../models/todo_model.dart';
 import '../models/add_history.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
+import 'todo_search_view.dart';
+import 'package:get/get.dart';
+import 'package:search_choices/search_choices.dart';
+import 'package:searchfield/searchfield.dart';
 
 class TodoView extends StatefulWidget {
   const TodoView({Key? key}) : super(key: key);
@@ -20,20 +24,42 @@ class TodoView extends StatefulWidget {
   _TodoViewState createState() => _TodoViewState();
 }
 
+final todo = TodoManager();
+final todoConfig = TodoConfigManager();
+List columnData = [];
+List<TodoConfig> listTodoConfig = [];
+List configData = [];
+
 class _TodoViewState extends State<TodoView> {
-  final todo = TodoManager();
   StreamController<List> streamController = StreamController();
   late TodoDataSource todoDataSource;
 
   Future getData() async {
     var data = await todo.getAll();
+
     streamController.add(data!);
+  }
+
+  Future getConfigData() async {
+    var data = await todoConfig.getAll();
+
+    listTodoConfig = data!;
+  }
+
+  Future getColumnData() async {
+    columnData = await todo.getColumnName()!;
+  }
+
+  Future getConfigColumn() async {
+    configData = await todoConfig.getColumnName()!;
   }
 
   @override
   void initState() {
     getData();
-
+    getColumnData();
+    getConfigColumn();
+    getConfigData();
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (SharedPreferenceUtil.getBool('isLoggedIn') == false) {
         navService.pushNamed('/login', args: 'Your are not logged in');
@@ -50,22 +76,44 @@ class _TodoViewState extends State<TodoView> {
 
   final int _currentSortColumn = 0;
   final bool _isAscending = true;
-  // final ScrollController horizontalScroll = ScrollController();
-  // final ScrollController verticalScroll = ScrollController();
+  String? valueType;
+  String? valueContent;
+
+  late Map<String, double> columnWidths = {
+    'Client': double.nan,
+    'ID': double.nan,
+    'Project Name': double.nan,
+    'Address': double.nan,
+    'Qty': double.nan,
+    'Service Type': double.nan,
+    'Complete Date': double.nan,
+    'Due Date': double.nan,
+    'Project Manager': double.nan,
+    'Server IP': double.nan,
+    'Start Date': double.nan,
+    'Status': double.nan,
+    'Task Owner': double.nan,
+    'Chrono Status': double.nan,
+    'Date Chronopost': double.nan,
+    'Number Chronopost': double.nan,
+    'Remarks': double.nan,
+  };
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments;
+
     if (SharedPreferenceUtil.getBool('isLoggedIn') == false) {
       return Scaffold(
           appBar: AppBar(
-            title: const Text("Todo Members"),
+            title: const Text("To-Do List"),
             elevation: 0,
           ),
           body: MyToast.show('Ops, You are not logged in yet!'));
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Todo Members"),
+        title: const Text("To-Do List"),
         actions: <Widget>[
           Padding(
               padding: const EdgeInsets.only(right: 20.0),
@@ -85,223 +133,247 @@ class _TodoViewState extends State<TodoView> {
         child: StreamBuilder<List>(
             stream: streamController.stream,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                todoDataSource =
-                    TodoDataSource(toDoData: snapshot.data!.cast<Todo>());
-                print(snapshot.data![0].toString());
-                print(DateTime.tryParse("2022-01-12"));
-                return SfDataGrid(
-                  source: todoDataSource,
-                  columnWidthMode: ColumnWidthMode.fill,
-                  columns: <GridColumn>[
-                    GridColumn(
-                        columnName: 'ID',
-                        label: Container(
-                            padding: EdgeInsets.all(16.0),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'ID',
-                            ))),
-                    GridColumn(
-                        columnName: 'Service Type',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Service TypeClient'))),
-                    GridColumn(
-                        columnName: 'Client',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'Client',
-                              overflow: TextOverflow.ellipsis,
-                            ))),
-                    GridColumn(
-                        columnName: 'Project Name',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Project Name'))),
-                    GridColumn(
-                        columnName: 'Address',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Address'))),
-                    GridColumn(
-                        columnName: 'Qty',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Qty'))),
-                    GridColumn(
-                        columnName: 'Server IP',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Server IP'))),
-                    GridColumn(
-                        columnName: 'Project Manager',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Project Manager'))),
-                    GridColumn(
-                        columnName: 'Status',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Status'))),
-                    GridColumn(
-                        columnName: 'Start Date',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Start Date'))),
-                    GridColumn(
-                        columnName: 'Due Date',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Due Date'))),
-                    GridColumn(
-                        columnName: 'Complete Date',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Complete Date'))),
-                    GridColumn(
-                        columnName: 'Task Owner',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Task Owner'))),
-                    GridColumn(
-                        columnName: 'Chrono Status',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Chrono Status'))),
-                    GridColumn(
-                        columnName: 'Date Chronopost',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Date Chronopost'))),
-                    GridColumn(
-                        columnName: 'Number Chronopost',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Number Chronopost'))),
-                    GridColumn(
-                        columnName: 'Remarks',
-                        label: Container(
-                            padding: EdgeInsets.all(8.0),
-                            alignment: Alignment.center,
-                            child: Text('Remarks'))),
-                  ],
-                );
+              if (snapshot.connectionState == ConnectionState.active) {
+                if (snapshot.hasError) {
+                  // 请求失败，显示错误
+                  return Text("Error: ${snapshot.error}");
+                } else {
+                  todoDataSource = TodoDataSource(
+                    toDoData: snapshot.data!.cast<Todo>(),
+                    args: args,
+                  );
+                  return SfDataGridTheme(
+                    data: SfDataGridThemeData(
+                        headerColor: Colors.amberAccent,
+                        headerHoverColor: Colors.amber,
+                        gridLineColor: Colors.amber,
+                        gridLineStrokeWidth: 1.0),
+                    child: SfDataGrid(
+                      allowEditing: true,
+                      allowTriStateSorting: true,
+                      allowSorting: true,
+                      allowMultiColumnSorting: true,
+                      selectionMode: SelectionMode.single,
+                      navigationMode: GridNavigationMode.cell,
+                      gridLinesVisibility: GridLinesVisibility.both,
+                      headerGridLinesVisibility: GridLinesVisibility.both,
+                      isScrollbarAlwaysShown: true,
+                      frozenColumnsCount: Platform.isAndroid ? 1 : 4,
+                      allowPullToRefresh: true,
+                      source: todoDataSource,
+                      // columnWidthMode: ColumnWidthMode.fitByCellValue,
+                      columnResizeMode: ColumnResizeMode.onResizeEnd,
+                      allowColumnsResizing: true,
+                      onQueryRowHeight: (details) {
+                        return details.getIntrinsicRowHeight(details.rowIndex);
+                      },
+
+                      onColumnResizeUpdate:
+                          (ColumnResizeUpdateDetails details) {
+                        setState(() {
+                          columnWidths[details.column.columnName] =
+                              details.width;
+                        });
+                        return true;
+                      },
+                      columns: <GridColumn>[
+                        GridColumn(
+                            width: columnWidths['ID']!,
+                            minimumWidth: 100.0,
+                            columnName: 'ID',
+                            label: Container(
+                                padding: const EdgeInsets.all(16.0),
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  'ID',
+                                ))),
+                        GridColumn(
+                            width: columnWidths['Service Type']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Service Type',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Service Type'))),
+                        GridColumn(
+                            width: columnWidths['Client']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Client',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Client'))),
+                        GridColumn(
+                            width: columnWidths['Project Name']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Project Name',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Project Name'))),
+                        GridColumn(
+                            width: columnWidths['Address']!,
+                            columnWidthMode: ColumnWidthMode.fitByCellValue,
+                            minimumWidth: 100.0,
+                            columnName: 'Address',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Address'))),
+                        GridColumn(
+                            width: columnWidths['Qty']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Qty',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Qty'))),
+                        GridColumn(
+                            width: columnWidths['Server IP']!,
+                            columnWidthMode: ColumnWidthMode.fitByCellValue,
+                            minimumWidth: 100.0,
+                            columnName: 'Server IP',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Server IP'))),
+                        GridColumn(
+                            width: columnWidths['Project Manager']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Project Manager',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Project Manager'))),
+                        GridColumn(
+                            width: columnWidths['Status']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Status',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Status'))),
+                        GridColumn(
+                            width: columnWidths['Start Date']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Start Date',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Start Date'))),
+                        GridColumn(
+                            width: columnWidths['Due Date']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Due Date',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Due Date'))),
+                        GridColumn(
+                            width: columnWidths['Complete Date']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Complete Date',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Complete Date'))),
+                        GridColumn(
+                            width: columnWidths['Task Owner']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Task Owner',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Task Owner'))),
+                        GridColumn(
+                            width: columnWidths['Chrono Status']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Chrono Status',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Chrono Status'))),
+                        GridColumn(
+                            width: columnWidths['Date Chronopost']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Date Chronopost',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Date Chronopost'))),
+                        GridColumn(
+                            width: columnWidths['Number Chronopost']!,
+                            columnWidthMode: ColumnWidthMode.fitByCellValue,
+                            minimumWidth: 100.0,
+                            columnName: 'Number Chronopost',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Number Chronopost'))),
+                        GridColumn(
+                            width: columnWidths['Remarks']!,
+                            minimumWidth: 100.0,
+                            columnName: 'Remarks',
+                            label: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: Alignment.center,
+                                child: const Text('Remarks'))),
+                      ],
+                    ),
+                  );
+                }
               } else {
-                return const Text("Loading...");
+                // 请求未结束，显示loading
+                return const SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
               }
             }),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Future.delayed(
+              const Duration(seconds: 0),
+              () => showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const TodoSearchView();
+                  }));
+        },
+        child: const Icon(Icons.search),
       ),
       drawer: const LeftSideBar(),
     );
   }
-
-//Click menu Add
-
-  final TextEditingController _editController = TextEditingController();
-
-//   clickShowMenu(item, context, details, String type, row, column) {
-//     showMenu(
-//         context: context,
-//         position: RelativeRect.fromLTRB(
-//           details.globalPosition.dx,
-//           details.globalPosition.dy,
-//           details.globalPosition.dx,
-//           details.globalPosition.dy,
-//         ),
-//         items: <PopupMenuEntry>[
-//           PopupMenuItem<String>(
-//             value: 'edit',
-//             child: const Text('Edit'),
-//             onTap: () {
-//               Future.delayed(
-//                   const Duration(seconds: 0),
-//                   () => showDialog(
-//                       context: context,
-//                       builder: (context) {
-//                         _editController.text = item;
-//                         return AlertDialog(
-//                           title: Text("Editing For ${type.capitalize()}"),
-//                           content: TextField(
-//                             onChanged: (value) {},
-//                             controller: _editController,
-//                             onEditingComplete: () {
-//                               Future.delayed(const Duration(seconds: 0),
-//                                   () async {
-//                                 bool res = await TodoManager()
-//                                     .insert(row, column, _editController.text);
-//                                 Navigator.pop(context);
-//                                 MyToast.show(res ? 'Success!' : 'Failed');
-//                                 setState(() {
-//                                   getData();
-//                                 });
-//                               });
-//                             },
-//                           ),
-//                           actions: <Widget>[
-//                             TextButton(
-//                                 onPressed: () => Navigator.pop(context),
-//                                 child: const Text('CANCEL')),
-//                             TextButton(
-//                                 onPressed: () {
-//                                   Future.delayed(const Duration(seconds: 0),
-//                                       () async {
-//                                     bool res = await TodoManager().insert(
-//                                         row, column, _editController.text);
-//                                     Navigator.pop(context);
-//                                     MyToast.show(res ? 'Success!' : 'Failed');
-//                                     setState(() {
-//                                       AddHistory().add(
-//                                           SharedPreferenceUtil.getString(
-//                                               'name'),
-//                                           item,
-//                                           _editController.text,
-//                                           'Todo',
-//                                           row,
-//                                           column);
-//                                       getData();
-//                                     });
-//                                   });
-//                                 },
-//                                 child: const Text('CONFIRM')),
-//                           ],
-//                         );
-//                       }));
-//             },
-//           ),
-//           PopupMenuItem<String>(
-//             value: item,
-//             child: Text(item == "" ? "No Data" : "Copy '$item'"),
-//             onTap: () {
-//               if (item != "") {
-//                 Clipboard.setData(ClipboardData(text: item));
-//                 MyToast.show('Copied to clipboard!');
-//               }
-//             },
-//           )
-//         ]);
-//   }
 }
 
 class TodoDataSource extends DataGridSource {
-  /// Creates the employee data source class with required details.
-  TodoDataSource({required List<Todo> toDoData}) {
+  /// Creates the todo data source
+  TodoDataSource({required List<Todo> toDoData, args}) {
+    if (args != null) {
+      List<Todo> toDoDataFiltered = [];
+      print("----------args-----------" +
+          args.toString() +
+          " ========" +
+          args['type'].toString());
+      for (var todo in toDoData) {
+        if (args['type'].toString().contains('Date')) {
+          if (dateValidate(todo.toGsheets()[args['type'].toString()]) ==
+              args['content'].toString()) toDoDataFiltered.add(todo);
+        } else {
+          if (todo.toGsheets()[args['type'].toString()].toString() ==
+              args['content'].toString()) {
+            toDoDataFiltered.add(todo);
+          }
+        }
+      }
+      toDoData = toDoDataFiltered;
+    }
+
     _toDoData = toDoData
         .map<DataGridRow>((e) => DataGridRow(cells: [
               DataGridCell<String>(columnName: 'ID', value: e.id),
@@ -315,21 +387,31 @@ class TodoDataSource extends DataGridSource {
               DataGridCell<String>(
                   columnName: 'Project Manager', value: e.projectManager),
               DataGridCell<String>(columnName: 'Status', value: e.status),
-              DataGridCell<DateTime>(
-                  columnName: 'Start Date', value: e.startDate),
-              DataGridCell<DateTime>(columnName: 'Due Date', value: e.dueDate),
-              DataGridCell<DateTime>(
-                  columnName: 'Complete Date', value: e.completeDate),
-              DataGridCell<String>(columnName: 'Task Owner', value: e.taskOwner),
+              DataGridCell<String>(
+                  columnName: 'Start Date', value: dateValidate(e.startDate)),
+              DataGridCell<String>(
+                  columnName: 'Due Date', value: dateValidate(e.dueDate)),
+              DataGridCell<String>(
+                  columnName: 'Complete Date',
+                  value: dateValidate(e.completeDate)),
+              DataGridCell<String>(
+                  columnName: 'Task Owner', value: e.taskOwner),
               DataGridCell<String>(
                   columnName: 'Chrono Status', value: e.chronoStatus),
-              DataGridCell<DateTime>(
-                  columnName: 'Date Chronopost', value: e.dateChronapost),
+              DataGridCell<String>(
+                  columnName: 'Date Chronopost',
+                  value: dateValidate(e.dateChronopost)),
               DataGridCell<String>(
                   columnName: 'Number Chronopost', value: e.numberChronopost),
               DataGridCell<String>(columnName: 'Remarks', value: e.remarks),
             ]))
         .toList();
+  }
+
+  @override
+  Future<void> handleRefresh() async {
+    await Future.delayed(const Duration(seconds: 2));
+    TodoManager().getAll();
   }
 
   List<DataGridRow> _toDoData = [];
@@ -343,9 +425,251 @@ class TodoDataSource extends DataGridSource {
         cells: row.getCells().map<Widget>((e) {
       return Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: Text(e.value.toString()),
       );
     }).toList());
   }
+
+  dynamic newCellValue;
+
+  /// Help to control the editable text in [TextField] widget.
+  TextEditingController editingController = TextEditingController();
+
+  @override
+  void onCellSubmit(DataGridRow dataGridRow, RowColumnIndex rowColumnIndex,
+      GridColumn column) {
+    final dynamic oldValue = dataGridRow
+            .getCells()
+            .firstWhere((DataGridCell dataGridCell) =>
+                dataGridCell.columnName == column.columnName)
+            .value ??
+        '';
+
+    final int dataRowIndex = _toDoData.indexOf(dataGridRow);
+
+    if (oldValue == newCellValue || newCellValue == null) {
+      newCellValue = oldValue;
+      return;
+    }
+    for (var element in columnData) {
+      if (column.columnName == element) {
+        rows[dataRowIndex].getCells()[rowColumnIndex.columnIndex] =
+            DataGridCell(columnName: element, value: newCellValue);
+      }
+    }
+    todo
+        .insert(dataRowIndex, rowColumnIndex.columnIndex, newCellValue)
+        .then((value) {
+      if (value == false) {
+        MyToast.show("Error: gsheets error");
+      }
+    });
+  }
+
+  // toGsheets(r, c, v) async {
+  //   bool success = await todo.insert(r, c, v);
+  //   return success;
+  // }
+
+  @override
+  Widget? buildEditWidget(DataGridRow dataGridRow,
+      RowColumnIndex rowColumnIndex, GridColumn column, CellSubmit submitCell) {
+    // Text going to display on editable widget
+    final String displayText = dataGridRow
+            .getCells()
+            .firstWhere((DataGridCell dataGridCell) =>
+                dataGridCell.columnName == column.columnName)
+            .value
+            ?.toString() ??
+        '';
+
+    // The new cell value must be reset.
+    // To avoid committing the [DataGridCell] value that was previously edited
+    // into the current non-modified [DataGridCell].
+    newCellValue = null;
+
+    final bool isNumericType = column.columnName == 'Qty';
+    final bool isMultiLine = column.columnName == 'Address' ||
+        column.columnName == 'Number Chronopost' ||
+        column.columnName == 'Remarks' ||
+        column.columnName == 'Server IP';
+    final bool isSelectable = column.columnName == 'Service Type' ||
+        column.columnName == 'Client' ||
+        column.columnName == 'Project Manager' ||
+        column.columnName == 'Status' ||
+        column.columnName == 'Chrono Status' ||
+        column.columnName == 'Task Owner';
+    final bool isDate = column.columnName.contains('Date');
+
+    //  deal with Date data
+    if (isDate) {
+      late DateTime selectedDate;
+      void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
+        selectedDate = args.value;
+      }
+
+      return Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: Alignment.centerLeft,
+        child: TextField(
+          mouseCursor: MouseCursor.defer,
+          readOnly: true,
+          maxLines: null,
+          autofocus: true,
+          controller: editingController..text = displayText,
+          textAlign: TextAlign.center,
+          onTap: () {
+            Get.defaultDialog(
+              title: "Pick a date",
+              content: SizedBox(
+                height: 400,
+                width: 400,
+                child: SfDateRangePicker(
+                    showNavigationArrow: true,
+                    initialSelectedDate: DateTime.tryParse(displayText),
+                    initialDisplayDate: DateTime.tryParse(displayText),
+                    onSelectionChanged: _onSelectionChanged,
+                    monthFormat: 'MMM',
+                    headerStyle: const DateRangePickerHeaderStyle(
+                        backgroundColor: Colors.amber,
+                        textAlign: TextAlign.center,
+                        textStyle: TextStyle(
+                          fontStyle: FontStyle.normal,
+                          fontSize: 25,
+                          letterSpacing: 5,
+                          color: Colors.white,
+                        ))),
+              ),
+              confirm: TextButton(
+                  onPressed: () {
+                    editingController.text = dateValidate(selectedDate);
+                    newCellValue = dateValidate(selectedDate);
+                    submitCell();
+                    Get.back();
+                  },
+                  child: const Text('CONFIRM')),
+              cancel: TextButton(
+                  onPressed: () => Get.back(), child: const Text('CANCEL')),
+            );
+          },
+        ),
+      );
+    }
+
+    // deal with selectable data
+    if (isSelectable) {
+      List<Map<String, String>> rowData = [];
+      List res = [];
+
+      for (var row in listTodoConfig) {
+        res.add(row.toGsheets()[column.columnName]);
+      }
+
+      for (var row in res) {
+        rowData.add({'value': row, 'display': row});
+      }
+      final _formKey = GlobalKey<FormState>();
+      var value;
+      return Container(
+        padding: const EdgeInsets.all(8.0),
+        alignment: isNumericType ? Alignment.centerRight : Alignment.centerLeft,
+        child: TextField(
+          mouseCursor: MouseCursor.defer,
+          readOnly: true,
+          maxLines: null,
+          autofocus: true,
+          controller: editingController..text = displayText,
+          textAlign: TextAlign.center,
+          onTap: () => Get.defaultDialog(
+            radius: 2,
+            title: column.columnName,
+            content: Container(
+              padding: const EdgeInsets.all(8.0),
+              alignment: Alignment.centerLeft,
+              child: Form(
+                key: _formKey,
+                child: SearchField(
+                  suggestions: res.cast(),
+                  suggestionState: SuggestionState.enabled,
+                  textInputAction: TextInputAction.done,
+                  // controller: editingController,
+                  hint: displayText,
+                  maxSuggestionsInViewPort: 4,
+                  itemHeight: 45,
+                  validator: (x) {
+                    if (!res.cast().contains(x)) {
+                      return 'This is not a ${column.columnName}';
+                    }
+                    return null;
+                  },
+                  // suggestionAction: SuggestionAction.next,
+
+                  onTap: (x) {
+                    if (_formKey.currentState!.validate()) {
+                      print(x);
+                      value = x;
+                    }
+                  },
+                ),
+              ),
+            ),
+            confirm: TextButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                  editingController.text = value;
+                  newCellValue = value;
+                  submitCell();
+                  Get.back();
+                  }
+                },
+                child: const Text('CONFIRM')),
+            cancel: TextButton(
+                onPressed: () => Get.back(), child: const Text('CANCEL')),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      alignment: isNumericType ? Alignment.centerRight : Alignment.centerLeft,
+      child: TextField(
+        maxLines: null,
+        autofocus: true,
+        controller: editingController..text = displayText,
+        textAlign: TextAlign.center,
+        decoration: const InputDecoration(
+            // contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 16.0),
+
+            ),
+        keyboardType: isNumericType
+            ? TextInputType.number
+            : isMultiLine
+                ? TextInputType.multiline
+                : TextInputType.text,
+        onChanged: (String value) {
+          if (value.isNotEmpty) {
+            if (isNumericType) {
+              newCellValue = int.parse(value);
+            } else {
+              newCellValue = value;
+            }
+          } else {
+            newCellValue = displayText;
+          }
+        },
+        onSubmitted: (String value) {
+          // onCellSubmit(dataGridRow, rowColumnIndex, column);
+
+          // In Mobile Platform.
+          // Call [CellSubmit] callback to fire the canSubmitCell and
+          // onCellSubmit to commit the new value in single place.
+          // cellSubmit();
+          submitCell();
+        },
+      ),
+    );
+  }
 }
+// 这里面的onEditingComplete 刷新 _TodoViewState里面的组件

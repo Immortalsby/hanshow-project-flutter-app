@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 
 // Colors
@@ -33,3 +34,10 @@ extension StringExtension on String {
       return"${this[0].toUpperCase()}${substring(1)}";
     }
 }
+
+  String dateValidate(DateTime? time) {
+    return DateFormat('yyyy-MM-dd').format(time ?? DateTime.now()) ==
+            DateFormat('yyyy-MM-dd').format(DateTime.now())
+        ? ''
+        : DateFormat('yyyy-MM-dd').format(time!);
+  }

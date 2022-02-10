@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import '../config/config.dart';
 import '../widgets/my_toast.dart';
 import '../widgets/my_header.dart';
@@ -9,6 +11,7 @@ import 'package:mysql1/mysql1.dart' as mysql;
 import '../utils/shared_preferences_util.dart';
 import '../models/crypt.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -59,9 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _emailController.text = SharedPreferenceUtil.getString('email')!.isEmpty
-        ? ""
-        : SharedPreferenceUtil.getString('email')!;
     ScreenUtil.init(
         BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width,
@@ -117,8 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: <Widget>[
                             Text("Login",
                                 style: TextStyle(
-                                    fontSize:
-                                        ScreenUtil().setSp(45),
+                                    fontSize: ScreenUtil().setSp(45),
                                     fontFamily: "Poppins-Bold",
                                     letterSpacing: .6)),
                             SizedBox(
@@ -127,8 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Text("Email",
                                 style: TextStyle(
                                     fontFamily: "Poppins",
-                                    fontSize:
-                                        ScreenUtil().setSp(26))),
+                                    fontSize: ScreenUtil().setSp(26))),
                             TextFormField(
                               controller: _emailController,
                               autofocus: true,
@@ -158,12 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             // Password Part
 
-
                             Text("Password",
                                 style: TextStyle(
                                     fontFamily: "Poppins",
-                                    fontSize:
-                                        ScreenUtil().setSp(26))),
+                                    fontSize: ScreenUtil().setSp(26))),
                             TextFormField(
                               controller: _passwordController,
                               obscureText: passwordInvisible,
@@ -197,20 +193,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(
                               height: ScreenUtil().setHeight(35),
                             ),
-                            SizedBox(
-                                height: ScreenUtil().setHeight(40)),
+                            SizedBox(height: ScreenUtil().setHeight(40)),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                SizedBox(
-                                    width:
-                                        ScreenUtil().setHeight(40)),
+                                SizedBox(width: ScreenUtil().setHeight(40)),
                                 InkWell(
                                   child: Container(
-                                    width:
-                                        ScreenUtil().setWidth(330),
-                                    height:
-                                        ScreenUtil().setHeight(100),
+                                    width: ScreenUtil().setWidth(330),
+                                    height: ScreenUtil().setHeight(100),
                                     decoration: BoxDecoration(
                                         color: kPrimaryColor,
                                         borderRadius:
@@ -306,6 +297,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     controller.addListener(onScroll);
     SharedPreferenceUtil.getInstance();
+    _emailController.text = SharedPreferenceUtil.getString('email')!.isEmpty
+        ? ""
+        : SharedPreferenceUtil.getString('email')!;
   }
 
   void onScroll() {
@@ -315,38 +309,71 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future login() async {
-    var _conn = await mysql.MySqlConnection.connect(setting);
-    if (validateAndSave()) {
+    if (kIsWeb) {
+      String _url =
+          "https://projet.hanshow.eu/getUser.php?email=${_emailController.value.text}";
+      var res = await http
+          .get(Uri.parse(_url), headers: {"Accept": "application/json"});
+      var _user = json.decode(res.body);
+
       String decodedPwd =
           Security(text: _passwordController.value.text).encrypt();
-      String querySql =
-          "select name, email, password, first_login, last_login_date from user where email='${_emailController.value.text}' and password='$decodedPwd'";
-      var result = await _conn.query(querySql);
-      setState(() {
-        _user = result.toList();
-      });
-      if (_user.isEmpty) {
+      if (_user.isEmpty || _user[0]['password'] != decodedPwd) {
         MyToast.show('Ops! Incorrect email or password');
         _passwordController.clear();
         setState(() {
           _errorText = ("Incorrect Email/Password");
         });
       } else {
-        MyToast.show("Welcome back ${_user[0]['name']!.toString().capitalize()}!");
+        MyToast.show(
+            "Welcome back ${_user[0]['name']!.toString().capitalize()}!");
         var datetime = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
-        await _conn.query(
-            "update user set last_login_date='${datetime.toString()}' where email='${_user[0]["email"]}'");
         await SharedPreferenceUtil.setString('email', _user[0]["email"]);
         await SharedPreferenceUtil.setString('name', _user[0]["name"]);
-        await SharedPreferenceUtil.setInt('first_login', _user[0]["first_login"]);
-        await SharedPreferenceUtil.setString(
-            'last_login_date', _user[0]["last_login_date"].toString().substring(0, 19));
+        await SharedPreferenceUtil.setInt(
+            'first_login', int.parse(_user[0]["first_login"]));
+        await SharedPreferenceUtil.setString('last_login_date',
+            _user[0]["last_login_date"].toString().substring(0, 19));
         await SharedPreferenceUtil.setBool("isLoggedIn", true);
         Navigator.popAndPushNamed(context, '/home');
       }
     } else {
-      MyToast.show('Ops, Invalid Email Address or Password');
+      var _conn = await mysql.MySqlConnection.connect(setting);
+      if (validateAndSave()) {
+        String decodedPwd =
+            Security(text: _passwordController.value.text).encrypt();
+        String querySql =
+            "select name, email, password, first_login, last_login_date from user where email='${_emailController.value.text}' and password='$decodedPwd'";
+        var result = await _conn.query(querySql);
+        setState(() {
+          _user = result.toList();
+        });
+        if (_user.isEmpty) {
+          MyToast.show('Ops! Incorrect email or password');
+          _passwordController.clear();
+          setState(() {
+            _errorText = ("Incorrect Email/Password");
+          });
+        } else {
+          MyToast.show(
+              "Welcome back ${_user[0]['name']!.toString().capitalize()}!");
+          var datetime =
+              DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
+          await _conn.query(
+              "update user set last_login_date='${datetime.toString()}' where email='${_user[0]["email"]}'");
+          await SharedPreferenceUtil.setString('email', _user[0]["email"]);
+          await SharedPreferenceUtil.setString('name', _user[0]["name"]);
+          await SharedPreferenceUtil.setInt(
+              'first_login', int.parse(_user[0]["first_login"]));
+          await SharedPreferenceUtil.setString('last_login_date',
+              _user[0]["last_login_date"].toString().substring(0, 19));
+          await SharedPreferenceUtil.setBool("isLoggedIn", true);
+          Navigator.popAndPushNamed(context, '/home');
+        }
+      } else {
+        MyToast.show('Ops, Invalid Email Address or Password');
+      }
+      await _conn.close();
     }
-    await _conn.close();
   }
 }

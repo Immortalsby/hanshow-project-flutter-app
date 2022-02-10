@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'package:hanshow_project_google_sheets/config/config.dart';
 import 'package:gsheets/gsheets.dart';
@@ -58,7 +56,6 @@ class TeamManager {
 
   Future<bool> insert(int row, int column, value) async {
     await init();
-    print("insert to Team: row:$row, column:$column, value:$value");
     return _teamSheet!.values.insertValue(
       value,
       column: column + 1,
