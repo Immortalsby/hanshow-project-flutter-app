@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 final cred = GsheetsCred();
 
 class Todo {
+  final int? no;
   final String? address;
   final String? client;
   final String? id;
@@ -26,7 +27,9 @@ class Todo {
   final String? remarks;
 
   const Todo(
-      {this.id,
+      {
+      this.no,
+      this.id,
       this.serviceType,
       this.client,
       this.projectName,
@@ -53,6 +56,7 @@ class Todo {
     }
 
     return Todo(
+      no: int.tryParse(json['No'] ?? ''),
       address: json['Address'],
       client: json['Client'],
       id: json['ID'],
@@ -75,6 +79,7 @@ class Todo {
 
   Map<String, dynamic> toGsheets() {
     return {
+      'No': no,
       'Address': address,
       'Client': client,
       'ID': id,
@@ -129,12 +134,12 @@ class TodoManager {
     return res;
   }
 
-  Future<bool> insert(int row, int column, value) async {
+  Future<bool> insert(int row, String columnName, value) async {
     await init();
-    return _todoSheet!.values.insertValue(
+    return _todoSheet!.values.insertValueByKeys(
       value,
-      column: column + 1,
-      row: row + 2,
+      columnKey: columnName,
+      rowKey: row,
     );
     
   }

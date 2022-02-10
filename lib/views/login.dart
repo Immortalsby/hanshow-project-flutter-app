@@ -364,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await SharedPreferenceUtil.setString('email', _user[0]["email"]);
           await SharedPreferenceUtil.setString('name', _user[0]["name"]);
           await SharedPreferenceUtil.setInt(
-              'first_login', int.parse(_user[0]["first_login"]));
+              'first_login', _user[0]["first_login"]);
           await SharedPreferenceUtil.setString('last_login_date',
               _user[0]["last_login_date"].toString().substring(0, 19));
           await SharedPreferenceUtil.setBool("isLoggedIn", true);

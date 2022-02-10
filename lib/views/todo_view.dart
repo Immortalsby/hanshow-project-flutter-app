@@ -29,6 +29,7 @@ final todoConfig = TodoConfigManager();
 List columnData = [];
 List<TodoConfig> listTodoConfig = [];
 List configData = [];
+dynamic args;
 
 class _TodoViewState extends State<TodoView> {
   StreamController<List> streamController = StreamController();
@@ -65,6 +66,7 @@ class _TodoViewState extends State<TodoView> {
         navService.pushNamed('/login', args: 'Your are not logged in');
       }
     });
+
     super.initState();
   }
 
@@ -80,6 +82,7 @@ class _TodoViewState extends State<TodoView> {
   String? valueContent;
 
   late Map<String, double> columnWidths = {
+    'No': double.nan,
     'Client': double.nan,
     'ID': double.nan,
     'Project Name': double.nan,
@@ -101,7 +104,7 @@ class _TodoViewState extends State<TodoView> {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments;
+
 
     if (SharedPreferenceUtil.getBool('isLoggedIn') == false) {
       return Scaffold(
@@ -140,7 +143,7 @@ class _TodoViewState extends State<TodoView> {
                 } else {
                   todoDataSource = TodoDataSource(
                     toDoData: snapshot.data!.cast<Todo>(),
-                    args: args,
+                    args: Get.arguments,
                   );
                   return SfDataGridTheme(
                     data: SfDataGridThemeData(
@@ -158,7 +161,7 @@ class _TodoViewState extends State<TodoView> {
                       gridLinesVisibility: GridLinesVisibility.both,
                       headerGridLinesVisibility: GridLinesVisibility.both,
                       isScrollbarAlwaysShown: true,
-                      frozenColumnsCount: Platform.isAndroid ? 1 : 4,
+                      frozenColumnsCount: Platform.isAndroid ? 2 : 5,
                       allowPullToRefresh: true,
                       source: todoDataSource,
                       // columnWidthMode: ColumnWidthMode.fitByCellValue,
@@ -178,9 +181,25 @@ class _TodoViewState extends State<TodoView> {
                       },
                       columns: <GridColumn>[
                         GridColumn(
+                            allowEditing: false,
+                            width: columnWidths['No']!,
+                            visible: false,
+                            columnName: 'No',
+                            label: Container(
+                                padding: const EdgeInsets.all(16.0),
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  'No',
+                                ))),
+                        GridColumn(
                             width: columnWidths['ID']!,
                             minimumWidth: 100.0,
                             columnName: 'ID',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'needchrono'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(16.0),
                                 alignment: Alignment.center,
@@ -198,6 +217,11 @@ class _TodoViewState extends State<TodoView> {
                         GridColumn(
                             width: columnWidths['Client']!,
                             minimumWidth: 100.0,
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             columnName: 'Client',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -216,6 +240,11 @@ class _TodoViewState extends State<TodoView> {
                             columnWidthMode: ColumnWidthMode.fitByCellValue,
                             minimumWidth: 100.0,
                             columnName: 'Address',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
@@ -233,6 +262,11 @@ class _TodoViewState extends State<TodoView> {
                             columnWidthMode: ColumnWidthMode.fitByCellValue,
                             minimumWidth: 100.0,
                             columnName: 'Server IP',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'needchrono'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
@@ -240,6 +274,11 @@ class _TodoViewState extends State<TodoView> {
                         GridColumn(
                             width: columnWidths['Project Manager']!,
                             minimumWidth: 100.0,
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             columnName: 'Project Manager',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -248,6 +287,11 @@ class _TodoViewState extends State<TodoView> {
                         GridColumn(
                             width: columnWidths['Status']!,
                             minimumWidth: 100.0,
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'needchrono'
+                                    ? false
+                                    : true
+                                : true,
                             columnName: 'Status',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -256,6 +300,11 @@ class _TodoViewState extends State<TodoView> {
                         GridColumn(
                             width: columnWidths['Start Date']!,
                             minimumWidth: 100.0,
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             columnName: 'Start Date',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -265,6 +314,11 @@ class _TodoViewState extends State<TodoView> {
                             width: columnWidths['Due Date']!,
                             minimumWidth: 100.0,
                             columnName: 'Due Date',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'needchrono'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
@@ -272,6 +326,11 @@ class _TodoViewState extends State<TodoView> {
                         GridColumn(
                             width: columnWidths['Complete Date']!,
                             minimumWidth: 100.0,
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             columnName: 'Complete Date',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -281,6 +340,11 @@ class _TodoViewState extends State<TodoView> {
                             width: columnWidths['Task Owner']!,
                             minimumWidth: 100.0,
                             columnName: 'Task Owner',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'needchrono'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
@@ -289,6 +353,11 @@ class _TodoViewState extends State<TodoView> {
                             width: columnWidths['Chrono Status']!,
                             minimumWidth: 100.0,
                             columnName: 'Chrono Status',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
@@ -297,6 +366,11 @@ class _TodoViewState extends State<TodoView> {
                             width: columnWidths['Date Chronopost']!,
                             minimumWidth: 100.0,
                             columnName: 'Date Chronopost',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
@@ -306,6 +380,11 @@ class _TodoViewState extends State<TodoView> {
                             columnWidthMode: ColumnWidthMode.fitByCellValue,
                             minimumWidth: 100.0,
                             columnName: 'Number Chronopost',
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'todo'
+                                    ? false
+                                    : true
+                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
@@ -313,6 +392,11 @@ class _TodoViewState extends State<TodoView> {
                         GridColumn(
                             width: columnWidths['Remarks']!,
                             minimumWidth: 100.0,
+                            visible: Get.arguments != null
+                                ? Get.arguments['filter'] == 'needchrono'
+                                    ? false
+                                    : true
+                                : true,
                             columnName: 'Remarks',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -338,11 +422,11 @@ class _TodoViewState extends State<TodoView> {
         onPressed: () {
           Future.delayed(
               const Duration(seconds: 0),
-              () => showDialog(
+              () async => args = await Get.to(showDialog(
                   context: context,
                   builder: (context) {
                     return const TodoSearchView();
-                  }));
+                  })));
         },
         child: const Icon(Icons.search),
       ),
@@ -356,10 +440,6 @@ class TodoDataSource extends DataGridSource {
   TodoDataSource({required List<Todo> toDoData, args}) {
     if (args != null) {
       List<Todo> toDoDataFiltered = [];
-      print("----------args-----------" +
-          args.toString() +
-          " ========" +
-          args['type'].toString());
       for (var todo in toDoData) {
         if (args['type'].toString().contains('Date')) {
           if (dateValidate(todo.toGsheets()[args['type'].toString()]) ==
@@ -376,11 +456,13 @@ class TodoDataSource extends DataGridSource {
 
     _toDoData = toDoData
         .map<DataGridRow>((e) => DataGridRow(cells: [
+              DataGridCell<int>(columnName: 'No', value: e.no),
               DataGridCell<String>(columnName: 'ID', value: e.id),
               DataGridCell<String>(
                   columnName: 'Service Type', value: e.serviceType),
               DataGridCell<String>(columnName: 'Client', value: e.client),
-              DataGridCell<String>(columnName: 'Project Name', value: e.client),
+              DataGridCell<String>(
+                  columnName: 'Project Name', value: e.projectName),
               DataGridCell<String>(columnName: 'Address', value: e.address),
               DataGridCell<int>(columnName: 'Qty', value: e.qty),
               DataGridCell<String>(columnName: 'Server IP', value: e.serverIp),
@@ -452,6 +534,7 @@ class TodoDataSource extends DataGridSource {
       newCellValue = oldValue;
       return;
     }
+
     for (var element in columnData) {
       if (column.columnName == element) {
         rows[dataRowIndex].getCells()[rowColumnIndex.columnIndex] =
@@ -459,7 +542,8 @@ class TodoDataSource extends DataGridSource {
       }
     }
     todo
-        .insert(dataRowIndex, rowColumnIndex.columnIndex, newCellValue)
+        .insert(rows[dataRowIndex].getCells()[0].value, column.columnName,
+            newCellValue)
         .then((value) {
       if (value == false) {
         MyToast.show("Error: gsheets error");
@@ -607,7 +691,6 @@ class TodoDataSource extends DataGridSource {
 
                   onTap: (x) {
                     if (_formKey.currentState!.validate()) {
-                      print(x);
                       value = x;
                     }
                   },
@@ -617,10 +700,10 @@ class TodoDataSource extends DataGridSource {
             confirm: TextButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                  editingController.text = value;
-                  newCellValue = value;
-                  submitCell();
-                  Get.back();
+                    editingController.text = value;
+                    newCellValue = value;
+                    submitCell();
+                    Get.back();
                   }
                 },
                 child: const Text('CONFIRM')),

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:get/get.dart';
+
 import '../utils/constant.dart';
 import 'package:flutter/material.dart';
 
@@ -72,6 +74,65 @@ class _TodoSearchViewState extends State<TodoSearchView> {
         mainAxisSize: MainAxisSize.min,
         // wrap content in flutter
         children: [
+          Row(
+            children: [
+              TextButton(
+                style: ButtonStyle(),
+                onPressed: () => {
+                  Navigator.popAndPushNamed(context, '/todo', arguments: {
+                    'type': 'Status',
+                    'content': 'Not Started',
+                    'filter': 'todo'
+                  })
+                },
+                child: Row(
+                  children: const [
+                    Icon(Icons.today_outlined),
+                    Text(
+                      'To Do',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () => {
+                  Navigator.popAndPushNamed(context, '/todo', arguments: {
+                    'type': 'Status',
+                    'content': 'Complete',
+                    'filter': 'complete'
+                  })
+                },
+                child: Row(
+                  children: const [
+                    Icon(Icons.done_all),
+                    Text(
+                      'Complete',
+                      style: TextStyle(color: Colors.blueAccent),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () => {
+                  Get.back(result: {
+                    'type': 'Chrono Status',
+                    'content': 'Need Chrono',
+                    'filter': 'needchrono'
+                  })
+                },
+                child: Row(
+                  children: const [
+                    Icon(Icons.car_rental_rounded),
+                    Text('Need Chrono'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
           FutureBuilder<List>(
               future: getColumnData(),
               builder: (context, snapshot) {
@@ -163,7 +224,6 @@ class _TodoSearchViewState extends State<TodoSearchView> {
                           valueContent = value;
                         });
                       },
-                      dialogBox: false,
                       isExpanded: true,
                     );
                   }
@@ -189,7 +249,6 @@ class _TodoSearchViewState extends State<TodoSearchView> {
             child: const Text('CANCEL')),
         TextButton(
             onPressed: () {
-              Navigator.pop(context);
               Navigator.popAndPushNamed(context, '/todo',
                   arguments: {'type': valueType, 'content': valueContent});
             },
@@ -197,5 +256,4 @@ class _TodoSearchViewState extends State<TodoSearchView> {
       ],
     );
   }
-
 }
