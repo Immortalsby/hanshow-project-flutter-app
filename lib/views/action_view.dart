@@ -2,52 +2,50 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hanshow_project_google_sheets/models/todo_model.dart';
 import 'package:hanshow_project_google_sheets/views/left_sidebar.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import '../utils/constant.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
 import '../widgets/my_toast.dart';
 import '../utils/shared_preferences_util.dart';
+import '../models/action_model.dart';
 import '../models/todo_model.dart';
 import '../models/add_history.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
-import 'todo_search_view.dart';
 import 'package:get/get.dart';
 import 'package:searchfield/searchfield.dart';
 
-class TodoView extends StatefulWidget {
-  const TodoView({Key? key}) : super(key: key);
+class ActionPlanView extends StatefulWidget {
+  const ActionPlanView({Key? key}) : super(key: key);
 
   @override
-  _TodoViewState createState() => _TodoViewState();
+  _ActionPlanViewState createState() => _ActionPlanViewState();
 }
 
-final todo = TodoManager();
-final todoConfig = TodoConfigManager();
+final actionPlan = ActionPlanManager();
 List columnData = [];
 List<TodoConfig> listTodoConfig = [];
 List configData = [];
+final todoConfig = TodoConfigManager();
 
-class _TodoViewState extends State<TodoView> {
+class _ActionPlanViewState extends State<ActionPlanView> {
   StreamController<List> streamController = StreamController();
-  late TodoDataSource todoDataSource;
+  late ActionPlanDataSource actionPlanDataSource;
 
   Future getData() async {
-    var data = await todo.getAll();
+    var data = await actionPlan.getAll();
 
     streamController.add(data!);
   }
 
+  Future getColumnData() async {
+    columnData = await actionPlan.getColumnName()!;
+  }
   Future getConfigData() async {
     var data = await todoConfig.getAll();
 
     listTodoConfig = data!;
-  }
-
-  Future getColumnData() async {
-    columnData = await todo.getColumnName()!;
   }
 
   Future getConfigColumn() async {
@@ -74,27 +72,17 @@ class _TodoViewState extends State<TodoView> {
     //cancel the timer
     super.dispose();
   }
+
   String? valueType;
   String? valueContent;
 
   late Map<String, double> columnWidths = {
-    'No': double.nan,
     'Client': double.nan,
-    'ID': double.nan,
-    'Project Name': double.nan,
-    'Address': double.nan,
-    'Qty': double.nan,
-    'Service Type': double.nan,
-    'Complete Date': double.nan,
+    'Action': double.nan,
     'Due Date': double.nan,
-    'Project Manager': double.nan,
-    'Server IP': double.nan,
     'Start Date': double.nan,
     'Status': double.nan,
     'Task Owner': double.nan,
-    'Chrono Status': double.nan,
-    'Date Chronopost': double.nan,
-    'Number Chronopost': double.nan,
     'Remarks': double.nan,
   };
 
@@ -103,14 +91,14 @@ class _TodoViewState extends State<TodoView> {
     if (SharedPreferenceUtil.getBool('isLoggedIn') == false) {
       return Scaffold(
           appBar: AppBar(
-            title: const Text("To-Do List"),
+            title: const Text("ActionPlan Plan"),
             elevation: 0,
           ),
           body: MyToast.show('Ops, You are not logged in yet!'));
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text("To-Do List"),
+        title: const Text("ActionPlan Plan"),
         actions: <Widget>[
           Padding(
               padding: const EdgeInsets.only(right: 20.0),
@@ -135,9 +123,8 @@ class _TodoViewState extends State<TodoView> {
                   // 请求失败，显示错误
                   return Text("Error: ${snapshot.error}");
                 } else {
-                  todoDataSource = TodoDataSource(
-                    toDoData: snapshot.data!.cast<Todo>(),
-                    args: Get.arguments,
+                  actionPlanDataSource = ActionPlanDataSource(
+                    actionPlanData: snapshot.data!.cast<ActionPlan>(),
                   );
                   return SfDataGridTheme(
                     data: SfDataGridThemeData(
@@ -155,9 +142,9 @@ class _TodoViewState extends State<TodoView> {
                       gridLinesVisibility: GridLinesVisibility.both,
                       headerGridLinesVisibility: GridLinesVisibility.both,
                       isScrollbarAlwaysShown: true,
-                      frozenColumnsCount: !kIsWeb && Platform.isAndroid ? 2 : 5,
                       allowPullToRefresh: true,
-                      source: todoDataSource,
+                      source: actionPlanDataSource,
+                      columnWidthMode: ColumnWidthMode.auto,
                       headerRowHeight:
                           !kIsWeb && Platform.isAndroid ? 70 : double.nan,
                       rowHeight:
@@ -177,130 +164,24 @@ class _TodoViewState extends State<TodoView> {
                       },
                       columns: <GridColumn>[
                         GridColumn(
-                            allowEditing: false,
-                            width: columnWidths['No']!,
-                            visible: false,
-                            columnName: 'No',
-                            label: Container(
-                                padding: const EdgeInsets.all(16.0),
-                                alignment: Alignment.center,
-                                child: const Text(
-                                  'No',
-                                ))),
-                        GridColumn(
-                            width: columnWidths['ID']!,
-                            minimumWidth: 100.0,
-                            columnName: 'ID',
-                            // visible: Get.arguments != null
-                            //     ? Get.arguments['filter'] == 'needchrono'
-                            //         ? false
-                            //         : true
-                            //     : true,
-                            label: Container(
-                                padding: const EdgeInsets.all(16.0),
-                                alignment: Alignment.center,
-                                child: const Text(
-                                  'ID',
-                                ))),
-                        GridColumn(
-                            width: columnWidths['Service Type']!,
-                            minimumWidth: 100.0,
-                            columnName: 'Service Type',
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Service Type'))),
-                        GridColumn(
                             width: columnWidths['Client']!,
                             minimumWidth: 100.0,
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
                             columnName: 'Client',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
                                 child: const Text('Client'))),
                         GridColumn(
-                            width: columnWidths['Project Name']!,
+                            width: columnWidths['Action']!,
                             minimumWidth: 120.0,
-                            columnName: 'Project Name',
+                            columnName: 'Action',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
-                                child: const Text('Project Name'))),
-                        GridColumn(
-                            width: columnWidths['Address']!,
-                            columnWidthMode: ColumnWidthMode.fitByCellValue,
-                            minimumWidth: 100.0,
-                            columnName: 'Address',
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Address'))),
-                        GridColumn(
-                            width: columnWidths['Qty']!,
-                            minimumWidth: 100.0,
-                            columnName: 'Qty',
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Qty'))),
-                        GridColumn(
-                            width: columnWidths['Server IP']!,
-                            columnWidthMode: ColumnWidthMode.fitByCellValue,
-                            minimumWidth: 100.0,
-                            columnName: 'Server IP',
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'needchrono'
-                                    ? false
-                                    : true
-                                : true,
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Server IP'))),
-                        GridColumn(
-                            width: columnWidths['Project Manager']!,
-                            minimumWidth: 100.0,
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
-                            columnName: 'Project Manager',
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Project Manager'))),
-                        GridColumn(
-                            width: columnWidths['Status']!,
-                            minimumWidth: 100.0,
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'needchrono'
-                                    ? false
-                                    : true
-                                : true,
-                            columnName: 'Status',
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Status'))),
+                                child: const Text('Action'))),
                         GridColumn(
                             width: columnWidths['Start Date']!,
                             minimumWidth: 100.0,
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
                             columnName: 'Start Date',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -310,89 +191,29 @@ class _TodoViewState extends State<TodoView> {
                             width: columnWidths['Due Date']!,
                             minimumWidth: 100.0,
                             columnName: 'Due Date',
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'needchrono'
-                                    ? false
-                                    : true
-                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
                                 child: const Text('Due Date'))),
                         GridColumn(
-                            width: columnWidths['Complete Date']!,
+                            width: columnWidths['Status']!,
                             minimumWidth: 100.0,
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
-                            columnName: 'Complete Date',
+                            columnName: 'Status',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
-                                child: const Text('Complete Date'))),
+                                child: const Text('Status'))),
                         GridColumn(
                             width: columnWidths['Task Owner']!,
                             minimumWidth: 100.0,
                             columnName: 'Task Owner',
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'needchrono'
-                                    ? false
-                                    : true
-                                : true,
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
                                 alignment: Alignment.center,
                                 child: const Text('Task Owner'))),
                         GridColumn(
-                            width: columnWidths['Chrono Status']!,
-                            minimumWidth: 100.0,
-                            columnName: 'Chrono Status',
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Chrono Status'))),
-                        GridColumn(
-                            width: columnWidths['Date Chronopost']!,
-                            minimumWidth: 100.0,
-                            columnName: 'Date Chronopost',
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Date Chronopost'))),
-                        GridColumn(
-                            width: columnWidths['Number Chronopost']!,
-                            columnWidthMode: ColumnWidthMode.fitByCellValue,
-                            minimumWidth: 100.0,
-                            columnName: 'Number Chronopost',
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'todo'
-                                    ? false
-                                    : true
-                                : true,
-                            label: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                alignment: Alignment.center,
-                                child: const Text('Number Chronopost'))),
-                        GridColumn(
                             width: columnWidths['Remarks']!,
                             minimumWidth: 100.0,
-                            visible: Get.arguments != null
-                                ? Get.arguments['filter'] == 'needchrono'
-                                    ? false
-                                    : true
-                                : true,
                             columnName: 'Remarks',
                             label: Container(
                                 padding: const EdgeInsets.all(8.0),
@@ -414,73 +235,24 @@ class _TodoViewState extends State<TodoView> {
               }
             }),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Future.delayed(
-              const Duration(seconds: 0),
-              () => showDialog(
-                  context: context,
-                  builder: (context) {
-                    return const TodoSearchView();
-                  }));
-        },
-        child: const Icon(Icons.search),
-      ),
       drawer: const LeftSideBar(),
     );
   }
 }
 
-class TodoDataSource extends DataGridSource {
+class ActionPlanDataSource extends DataGridSource {
   /// Creates the todo data source
-  TodoDataSource({required List<Todo> toDoData, args}) {
-    if (args != null) {
-      List<Todo> toDoDataFiltered = [];
-      for (var todo in toDoData) {
-        if (args['type'].toString().contains('Date')) {
-          if (dateValidate(todo.toGsheets()[args['type'].toString()]) ==
-              args['content'].toString()) toDoDataFiltered.add(todo);
-        } else {
-          if (todo.toGsheets()[args['type'].toString()].toString() ==
-              args['content'].toString()) {
-            toDoDataFiltered.add(todo);
-          }
-        }
-      }
-      toDoData = toDoDataFiltered;
-    }
-
-    _toDoData = toDoData
+  ActionPlanDataSource({required List<ActionPlan> actionPlanData}) {
+    _actionPlanData = actionPlanData
         .map<DataGridRow>((e) => DataGridRow(cells: [
-              DataGridCell<int>(columnName: 'No', value: e.no),
-              DataGridCell<String>(columnName: 'ID', value: e.id),
-              DataGridCell<String>(
-                  columnName: 'Service Type', value: e.serviceType),
               DataGridCell<String>(columnName: 'Client', value: e.client),
-              DataGridCell<String>(
-                  columnName: 'Project Name', value: e.projectName),
-              DataGridCell<String>(columnName: 'Address', value: e.address),
-              DataGridCell<int>(columnName: 'Qty', value: e.qty),
-              DataGridCell<String>(columnName: 'Server IP', value: e.serverIp),
-              DataGridCell<String>(
-                  columnName: 'Project Manager', value: e.projectManager),
-              DataGridCell<String>(columnName: 'Status', value: e.status),
+              DataGridCell<String>(columnName: 'Action', value: e.action),
               DataGridCell<String>(
                   columnName: 'Start Date', value: dateValidate(e.startDate)),
               DataGridCell<String>(
                   columnName: 'Due Date', value: dateValidate(e.dueDate)),
-              DataGridCell<String>(
-                  columnName: 'Complete Date',
-                  value: dateValidate(e.completeDate)),
-              DataGridCell<String>(
-                  columnName: 'Task Owner', value: e.taskOwner),
-              DataGridCell<String>(
-                  columnName: 'Chrono Status', value: e.chronoStatus),
-              DataGridCell<String>(
-                  columnName: 'Date Chronopost',
-                  value: dateValidate(e.dateChronopost)),
-              DataGridCell<String>(
-                  columnName: 'Number Chronopost', value: e.numberChronopost),
+              DataGridCell<String>(columnName: 'Status', value: e.status),
+              DataGridCell<String>(columnName: 'Task Owner', value: e.taskOwner),
               DataGridCell<String>(columnName: 'Remarks', value: e.remarks),
             ]))
         .toList();
@@ -489,13 +261,13 @@ class TodoDataSource extends DataGridSource {
   @override
   Future<void> handleRefresh() async {
     await Future.delayed(const Duration(seconds: 2));
-    TodoManager().getAll();
+    ActionPlanManager().getAll();
   }
 
-  List<DataGridRow> _toDoData = [];
+  List<DataGridRow> _actionPlanData = [];
 
   @override
-  List<DataGridRow> get rows => _toDoData;
+  List<DataGridRow> get rows => _actionPlanData;
 
   @override
   DataGridRowAdapter buildRow(DataGridRow row) {
@@ -524,7 +296,7 @@ class TodoDataSource extends DataGridSource {
             .value ??
         '';
 
-    final int dataRowIndex = _toDoData.indexOf(dataGridRow);
+    final int dataRowIndex = _actionPlanData.indexOf(dataGridRow);
 
     if (oldValue == newCellValue || newCellValue == null) {
       newCellValue = oldValue;
@@ -538,8 +310,8 @@ class TodoDataSource extends DataGridSource {
       }
     }
     // Insert to Gsheets!!!!!!!!!!!!!!   !important
-    todo
-        .insert(rows[dataRowIndex].getCells()[0].value, column.columnName,
+    actionPlan
+        .insert(dataRowIndex, rowColumnIndex.columnIndex,
             newCellValue)
         .then((value) {
       if (value == false) {
@@ -549,8 +321,8 @@ class TodoDataSource extends DataGridSource {
             SharedPreferenceUtil.getString('name'),
             oldValue,
             newCellValue,
-            'ToDoList',
-            rows[dataRowIndex].getCells()[0].value - 1,
+            'ActionPlan',
+            dataRowIndex,
             rowColumnIndex.columnIndex);
       }
     });
@@ -578,16 +350,10 @@ class TodoDataSource extends DataGridSource {
     // into the current non-modified [DataGridCell].
     newCellValue = null;
 
-    final bool isNumericType = column.columnName == 'Qty';
-    final bool isMultiLine = column.columnName == 'Address' ||
-        column.columnName == 'Number Chronopost' ||
-        column.columnName == 'Remarks' ||
-        column.columnName == 'Server IP';
-    final bool isSelectable = column.columnName == 'Service Type' ||
-        column.columnName == 'Client' ||
-        column.columnName == 'Project Manager' ||
+    final bool isMultiLine =
+        column.columnName == 'Action' || column.columnName == 'Remarks';
+    final bool isSelectable = column.columnName == 'Client' ||
         column.columnName == 'Status' ||
-        column.columnName == 'Chrono Status' ||
         column.columnName == 'Task Owner';
     final bool isDate = column.columnName.contains('Date');
 
@@ -662,7 +428,7 @@ class TodoDataSource extends DataGridSource {
       String? value = "No Data";
       return Container(
         padding: const EdgeInsets.all(8.0),
-        alignment: isNumericType ? Alignment.centerRight : Alignment.centerLeft,
+        alignment: Alignment.centerLeft,
         child: TextField(
           mouseCursor: MouseCursor.defer,
           readOnly: true,
@@ -692,7 +458,7 @@ class TodoDataSource extends DataGridSource {
                     }
                     return null;
                   },
-                  // suggestionAction: SuggestionAction.next,
+                  // suggestionActionPlan: SuggestionActionPlan.next,
 
                   onTap: (x) {
                     if (_formKey.currentState!.validate()) {
@@ -721,7 +487,7 @@ class TodoDataSource extends DataGridSource {
 
     return Container(
       padding: const EdgeInsets.all(8.0),
-      alignment: isNumericType ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: Alignment.centerLeft,
       child: TextField(
         maxLines: null,
         autofocus: true,
@@ -731,18 +497,12 @@ class TodoDataSource extends DataGridSource {
             // contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 16.0),
 
             ),
-        keyboardType: isNumericType
-            ? TextInputType.number
-            : isMultiLine
+        keyboardType: isMultiLine
                 ? TextInputType.multiline
                 : TextInputType.text,
         onChanged: (String value) {
           if (value.isNotEmpty) {
-            if (isNumericType) {
-              newCellValue = int.parse(value);
-            } else {
               newCellValue = value;
-            }
           } else {
             newCellValue = ' ';
           }
@@ -760,4 +520,4 @@ class TodoDataSource extends DataGridSource {
     );
   }
 }
-// 这里面的onEditingComplete 刷新 _TodoViewState里面的组件
+// 这里面的onEditingComplete 刷新 _ActionPlanViewState里面的组件

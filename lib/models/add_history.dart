@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import '../config/config.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
 
 class AddHistory {
-
   var dict = {
     0: "A",
     1: "B",
@@ -34,15 +35,28 @@ class AddHistory {
 
   Future add(
       username, originalData, newData, targetSheet, int row, int column) async {
-
     String position = dict[column]! + (row + 2).toString();
-    var _conn = await mysql.MySqlConnection.connect(setting);
-    String querySql =
-        '''insert into history (username, original_data, new_data, target_sheet, position) 
+    
+    if (kIsWeb) {
+      var url = "https://projet.hanshow.eu/addHistory.php";
+      await http.post(Uri.parse(url), body: {
+        "username": username,
+        "original_data": originalData,
+        "new_data": newData,
+        "target_sheet": targetSheet,
+        "position": position
+      });
+
+    } else {
+      var _conn = await mysql.MySqlConnection.connect(setting);
+      String querySql =
+          '''insert into history (username, original_data, new_data, target_sheet, position) 
         values (?, ?, ?, ?, ?)''';
 
-    await _conn.query(querySql, [username, originalData, newData, targetSheet, position]);
+      await _conn.query(
+          querySql, [username, originalData, newData, targetSheet, position]);
 
-    await _conn.close();
+      await _conn.close();
+    }
   }
 }

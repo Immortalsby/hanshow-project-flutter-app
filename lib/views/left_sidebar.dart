@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hanshow_project_google_sheets/config/config.dart';
 import '../utils/shared_preferences_util.dart';
@@ -34,9 +35,9 @@ class LeftSideBar extends StatelessWidget {
                       style:
                           const TextStyle(color: Colors.white, fontSize: 18)),
                   //账户头像
-                  currentAccountPicture: const CircleAvatar(
+                  currentAccountPicture: CircleAvatar(
                     backgroundImage: NetworkImage(
-                        "https://randomuser.me/api/portraits/men/46.jpg"),
+                        SharedPreferenceUtil.getString('avator_url') ?? ''),
                   ),
 
                   //配置背景
@@ -47,24 +48,26 @@ class LeftSideBar extends StatelessWidget {
 
                   //配置其他
                   otherAccountsPictures: <Widget>[
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        // SharedPreferenceUtil.setBool("isLoggedIn", false);
-                        Future.delayed(
-                            const Duration(seconds: 0),
-                            () => showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return const ChangePasswordView();
-                                }));
-                      },
-                      icon: const Icon(
-                        Icons.password,
-                        color: Colors.white70,
-                      ),
-                      tooltip: 'Change Password',
-                    ),
+                    kIsWeb
+                        ? const Text('')
+                        : IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              // SharedPreferenceUtil.setBool("isLoggedIn", false);
+                              Future.delayed(
+                                  const Duration(seconds: 0),
+                                  () => showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return const ChangePasswordView();
+                                      }));
+                            },
+                            icon: const Icon(
+                              Icons.password,
+                              color: Colors.white70,
+                            ),
+                            tooltip: 'Change Password',
+                          ),
                     IconButton(
                       onPressed: () {
                         Navigator.popAndPushNamed(context, '/login');
@@ -101,6 +104,32 @@ class LeftSideBar extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 20),
                 child: ListTile(
+                  title: const Text('To-Do List'),
+                  leading: const Icon(
+                    Icons.list,
+                    color: Colors.black,
+                  ),
+                  onTap: () {
+                    Navigator.popAndPushNamed(context, '/todo');
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: ListTile(
+                  title: const Text('Action Plan'),
+                  leading: const Icon(
+                    Icons.alarm,
+                    color: Colors.black,
+                  ),
+                  onTap: () {
+                    Navigator.popAndPushNamed(context, '/action');
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: ListTile(
                   title: const Text(
                     'Team Member',
                   ),
@@ -114,20 +143,6 @@ class LeftSideBar extends StatelessWidget {
                     } else {
                       Navigator.pop(context);
                     }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: ListTile(
-                  title: const Text('To-Do List'),
-                  leading: const Icon(
-                    Icons.list,
-                    color: Colors.black,
-                  ),
-                  onTap: () {
-
-                      Navigator.popAndPushNamed(context, '/todo');
                   },
                 ),
               ),

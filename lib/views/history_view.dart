@@ -90,6 +90,7 @@ class _HistoryState extends State<History> {
                       child: GroupedListView<dynamic, String>(
                         elements: snapshot.data!,
                         order: GroupedListOrder.ASC,
+                        sort: false,
                         floatingHeader: true,
                         useStickyGroupSeparators: true,
                         groupBy: (data) => kIsWeb

@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.hanshow_project_google_sheets">
+    package="com.example.hspjtteam">
    <application
-        android:label="hanshow_project_google_sheets"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Hanshow Project"
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -39,4 +39,5 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+    <uses-permission android:name="android.permission.INTERNET" /> 
 </manifest>

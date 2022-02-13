@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../config/config.dart';
 import '../widgets/my_toast.dart';
@@ -10,7 +11,6 @@ import 'package:intl/intl.dart';
 import 'package:mysql1/mysql1.dart' as mysql;
 import '../utils/shared_preferences_util.dart';
 import '../models/crypt.dart';
-import 'package:no_context_navigation/no_context_navigation.dart';
 import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
@@ -78,21 +78,17 @@ class _LoginScreenState extends State<LoginScreen> {
           children: <Widget>[
             MyHeader(
               image: "assets/icons/barbecue.svg",
-              textTop: "Hanshow Project",
+              textTop: !kIsWeb &&Platform.isAndroid?"HS Project": "Hanshow Project",
               textBottom: "DashBoard",
               offset: offset,
-            ),
-            InkWell(
-              onTap: () => navService.pushNamed('/team'),
-              child: const Text("click to team"),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Container(
-                    width: double.infinity,
+                    width: !kIsWeb && Platform.isAndroid ? double.infinity : 500,
                     padding: const EdgeInsets.only(bottom: 1),
                     decoration: BoxDecoration(
                         color: Colors.white,
@@ -200,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 SizedBox(width: ScreenUtil().setHeight(40)),
                                 InkWell(
                                   child: Container(
-                                    width: ScreenUtil().setWidth(330),
+                                    width: 150,
                                     height: ScreenUtil().setHeight(100),
                                     decoration: BoxDecoration(
                                         color: kPrimaryColor,
@@ -245,12 +241,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      horizontalLine(),
-                      const Text("Version: $version",
+                    children: const <Widget>[
+
+                       Text("Version: $version",
                           style: TextStyle(
-                              fontSize: 16.0, fontFamily: "Poppins-Medium")),
-                      horizontalLine()
+                              fontSize: 12.0, fontFamily: "Poppins-Medium")),
+
                     ],
                   ),
                   SizedBox(
@@ -296,7 +292,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     controller.addListener(onScroll);
-    SharedPreferenceUtil.getInstance();
+
     _emailController.text = SharedPreferenceUtil.getString('email')!.isEmpty
         ? ""
         : SharedPreferenceUtil.getString('email')!;
@@ -328,13 +324,20 @@ class _LoginScreenState extends State<LoginScreen> {
         MyToast.show(
             "Welcome back ${_user[0]['name']!.toString().capitalize()}!");
         var datetime = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
+
         await SharedPreferenceUtil.setString('email', _user[0]["email"]);
         await SharedPreferenceUtil.setString('name', _user[0]["name"]);
+        await SharedPreferenceUtil.setString('avator_url', _user[0]["avator_url"]);
         await SharedPreferenceUtil.setInt(
             'first_login', int.parse(_user[0]["first_login"]));
         await SharedPreferenceUtil.setString('last_login_date',
             _user[0]["last_login_date"].toString().substring(0, 19));
         await SharedPreferenceUtil.setBool("isLoggedIn", true);
+        String _url =
+        "https://projet.hanshow.eu/updateUser.php?query=update%20user%20set%20last_login_date='${datetime.toString()}'%20where%20email='${_user[0]["email"]}'";
+        await http
+          .get(Uri.parse(_url), headers: {"Accept": "application/json"});
+        
         Navigator.popAndPushNamed(context, '/home');
       }
     } else {
@@ -343,7 +346,7 @@ class _LoginScreenState extends State<LoginScreen> {
         String decodedPwd =
             Security(text: _passwordController.value.text).encrypt();
         String querySql =
-            "select name, email, password, first_login, last_login_date from user where email='${_emailController.value.text}' and password='$decodedPwd'";
+            "select name, email, password,avator_url, first_login, last_login_date from user where email='${_emailController.value.text}' and password='$decodedPwd'";
         var result = await _conn.query(querySql);
         setState(() {
           _user = result.toList();
@@ -363,6 +366,7 @@ class _LoginScreenState extends State<LoginScreen> {
               "update user set last_login_date='${datetime.toString()}' where email='${_user[0]["email"]}'");
           await SharedPreferenceUtil.setString('email', _user[0]["email"]);
           await SharedPreferenceUtil.setString('name', _user[0]["name"]);
+          await SharedPreferenceUtil.setString('avator_url', _user[0]["avator_url"]);
           await SharedPreferenceUtil.setInt(
               'first_login', _user[0]["first_login"]);
           await SharedPreferenceUtil.setString('last_login_date',

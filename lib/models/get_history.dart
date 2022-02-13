@@ -15,7 +15,7 @@ class GetHistory {
       return (result.toList());
     } else {
       var _conn = await mysql.MySqlConnection.connect(setting);
-      String querySql = 'select * from history';
+      String querySql = 'select * from history order by modify_date desc';
 
       var result = await _conn.query(querySql);
 

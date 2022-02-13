@@ -4,15 +4,22 @@ import 'package:hanshow_project_google_sheets/views/history_view.dart';
 import 'package:hanshow_project_google_sheets/views/login.dart';
 import 'package:hanshow_project_google_sheets/views/team_view.dart';
 import 'package:hanshow_project_google_sheets/views/todo_view.dart';
+import 'package:hanshow_project_google_sheets/views/action_view.dart';
 import 'package:hanshow_project_google_sheets/views/home.dart';
 import 'package:no_context_navigation/no_context_navigation.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:get/get.dart';
 
-Future<void> main() async {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // ignore: unused_local_variable
+  late SharedPreferenceUtil _preferences;
+  _preferences = await SharedPreferenceUtil.getInstance();
+
   runApp(const MyApp());
-  SharedPreferenceUtil.getInstance();
 }
+
+class SharedPreferences {}
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -41,11 +48,15 @@ class MyApp extends StatelessWidget {
             '/login': (context) => const LoginScreen(),
             '/history': (context) => const History(),
             '/todo': (context) => const TodoView(),
+            '/action': (context) => const ActionPlanView(),
           },
           initialRoute:
               SharedPreferenceUtil.getBool('isLoggedIn')! ? '/home' : '/login',
           onGenerateRoute: (RouteSettings settings) {
             switch (settings.name) {
+              case '/action':
+                return MaterialPageRoute(
+                    builder: (_) => const ActionPlanView());
               case '/todo':
                 return MaterialPageRoute(builder: (_) => const TodoView());
               case '/history':

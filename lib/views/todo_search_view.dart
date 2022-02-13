@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../utils/constant.dart';
@@ -23,7 +25,7 @@ class _TodoSearchViewState extends State<TodoSearchView> {
   String? valueContent;
   Future<List> getColumnData() async {
     List res = await todo.getColumnName()!;
-
+    res.remove('No');
     return res;
   }
 
@@ -75,59 +77,132 @@ class _TodoSearchViewState extends State<TodoSearchView> {
         // wrap content in flutter
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TextButton(
-                style: ButtonStyle(),
-                onPressed: () => {
-                  Navigator.popAndPushNamed(context, '/todo', arguments: {
-                    'type': 'Status',
-                    'content': 'Not Started',
-                    'filter': 'todo'
-                  })
-                },
-                child: Row(
-                  children: const [
-                    Icon(Icons.today_outlined),
-                    Text(
-                      'To Do',
-                      style: TextStyle(color: Colors.red),
+              !kIsWeb &&Platform.isAndroid
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          onPressed: () => {
+                            Get.offAndToNamed('/todo', arguments: {
+                              'type': 'Status',
+                              'content': 'Not Started',
+                              'filter': 'todo'
+                            })
+                            // Get.offAndToNamed(page)
+                          },
+                          icon: const Icon(Icons.today_outlined),
+                        ),
+                        const Text(
+                          "To do",
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    )
+                  : TextButton(
+                      onPressed: () => {
+                        Get.offAndToNamed('/todo', arguments: {
+                          'type': 'Status',
+                          'content': 'Not Started',
+                          'filter': 'todo'
+                        })
+                        // Get.offAndToNamed(page)
+                      },
+                      child: Row(
+                        children: const [
+                          Icon(
+                            Icons.today_outlined,
+                            semanticLabel: "To do",
+                          ),
+                          Text(
+                            'To Do',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () => {
-                  Navigator.popAndPushNamed(context, '/todo', arguments: {
-                    'type': 'Status',
-                    'content': 'Complete',
-                    'filter': 'complete'
-                  })
-                },
-                child: Row(
-                  children: const [
-                    Icon(Icons.done_all),
-                    Text(
-                      'Complete',
-                      style: TextStyle(color: Colors.blueAccent),
+              !kIsWeb &&Platform.isAndroid
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          onPressed: () => {
+                            Get.offAndToNamed('/todo', arguments: {
+                              'type': 'Status',
+                              'content': 'Complete',
+                              'filter': 'complete'
+                            })
+                            // Get.offAndToNamed(page)
+                          },
+                          icon: const Icon(Icons.today_outlined),
+                        ),
+                        const Text(
+                          "Complete",
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    )
+                  : TextButton(
+                      onPressed: () => {
+                        Get.offAndToNamed('/todo', arguments: {
+                          'type': 'Status',
+                          'content': 'Complete',
+                          'filter': 'complete'
+                        })
+                      },
+                      child: Row(
+                        children: const [
+                          Icon(
+                            Icons.done_all,
+                            semanticLabel: "Complete",
+                          ),
+                          Text(
+                            'Complete',
+                            style: TextStyle(color: Colors.blueAccent),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () => {
-                  Get.back(result: {
-                    'type': 'Chrono Status',
-                    'content': 'Need Chrono',
-                    'filter': 'needchrono'
-                  })
-                },
-                child: Row(
-                  children: const [
-                    Icon(Icons.car_rental_rounded),
-                    Text('Need Chrono'),
-                  ],
-                ),
-              ),
+              !kIsWeb &&Platform.isAndroid
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        IconButton(
+                          onPressed: () => {
+                            Get.offAndToNamed('/todo', arguments: {
+                              'type': 'Chrono Status',
+                              'content': 'Need Chrono',
+                              'filter': 'needchrono'
+                            })
+                            // Get.offAndToNamed(page)
+                          },
+                          icon: const Icon(Icons.today_outlined),
+                        ),
+                        const Text(
+                          "Need Chrono",
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    )
+                  : TextButton(
+                      onPressed: () => {
+                        Get.offAndToNamed('/todo', arguments: {
+                          'type': 'Chrono Status',
+                          'content': 'Need Chrono',
+                          'filter': 'needchrono'
+                        })
+                      },
+                      child: Row(
+                        children: const [
+                          Icon(
+                            Icons.car_rental_rounded,
+                            semanticLabel: "Need Chrono",
+                          ),
+                          Text('Need Chrono'),
+                        ],
+                      ),
+                    ),
             ],
           ),
           const SizedBox(
