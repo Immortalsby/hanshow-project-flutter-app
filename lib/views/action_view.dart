@@ -365,7 +365,7 @@ class ActionPlanDataSource extends DataGridSource {
       }
 
       return Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: !kIsWeb && Platform.isAndroid ? const EdgeInsets.all(0.0):const EdgeInsets.all(8.0),
         alignment: Alignment.centerLeft,
         child: TextField(
           mouseCursor: MouseCursor.defer,
@@ -427,7 +427,7 @@ class ActionPlanDataSource extends DataGridSource {
       final _formKey = GlobalKey<FormState>();
       String? value = "No Data";
       return Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: !kIsWeb && Platform.isAndroid ? const EdgeInsets.all(0.0):const EdgeInsets.all(8.0),
         alignment: Alignment.centerLeft,
         child: TextField(
           mouseCursor: MouseCursor.defer,
@@ -486,7 +486,7 @@ class ActionPlanDataSource extends DataGridSource {
     }
 
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: !kIsWeb && Platform.isAndroid ? const EdgeInsets.all(0.0):const EdgeInsets.all(8.0),
       alignment: Alignment.centerLeft,
       child: TextField(
         maxLines: null,
